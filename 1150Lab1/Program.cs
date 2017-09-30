@@ -13,12 +13,13 @@ namespace _1150Lab1
             int port = 80;
             Byte[] bytesReceived = new Byte[512];
 
-            Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+            IPAddress[] adds = Dns.GetHostEntry(hostname).AddressList;
             IPAddress host = Dns.GetHostEntry(hostname).AddressList[0];
             IPEndPoint hostep = new IPEndPoint(host, port);
             sock.Connect(hostep);
 
-            string request = "GET http://api.wunderground.com/api/b0a73c25c2f40b1b/conditions/q/CA/San Francisco.xml\r\n" + "HTTP/1.1\r\n Host: api.wunderground.com\r\nConnection: Close\\r\\n\\r\\n\";";
+            string request = "GET /api/d35da3b56e1c814c/conditions/q/CA/San_Francisco.xml HTTP/1.1 \r\n" + "Host: api.wunderground.com\r\n" + "Content-Length: 0\r\n" + "\r\n";
             int response = sock.Send(Encoding.UTF8.GetBytes(request));
 
             int bytes = 0;
