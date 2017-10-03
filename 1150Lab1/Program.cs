@@ -41,6 +41,12 @@ namespace _1150Lab1
             var responseBytes = socket.Receive(responseBuffer, responseBuffer.Length, 0);
             var responseData = initialResponse + Encoding.ASCII.GetString(responseBuffer, 0, responseBytes);
 
+            if (responseData.Contains("querynotfound"))
+            {
+                Console.WriteLine("City not found! Please try again.");
+                return;
+            }
+
             var xml = XDocument.Parse(responseData);
 
             var city = xml.Descendants("city").First()?.Value;
