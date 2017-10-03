@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace _1150Lab1
 {
@@ -32,6 +34,17 @@ namespace _1150Lab1
 
             var responseBytes = socket.Receive(responseBuffer, responseBuffer.Length, 0);
             var responseData = initialResponse + Encoding.ASCII.GetString(responseBuffer, 0, responseBytes);
+
+            var xml = XDocument.Parse(responseData);
+
+            var city = xml.Descendants("city").First()?.Value;
+            var state = xml.Descendants("state").First()?.Value;
+
+            var weather = xml.Descendants("weather").First()?.Value;
+            var temperature = xml.Descendants("temperature_string").First()?.Value;
+            var wind = xml.Descendants("wind_string").First()?.Value;
+
+            Console.WriteLine($"Weather forecast for {city}, {state}\n\n{weather}\n{temperature}\n{wind}");
         }
     }
 }
