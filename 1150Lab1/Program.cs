@@ -12,6 +12,12 @@ namespace _1150Lab1
     {
         static void Main(string[] args)
         {
+            if (args.Length != 2)
+            {
+                Console.WriteLine("Invalid arguments!\nUsage: <city name> <state abbreviation>");
+                return;
+            }
+
             const string hostname = "api.wunderground.com";
             const int port = 80;
 
@@ -22,7 +28,7 @@ namespace _1150Lab1
 
             var bytesReceived = new byte[512];
 
-            const string request = "GET /api/d35da3b56e1c814c/conditions/q/CA/San_Francisco.xml HTTP/1.1 \r\n" + "Host: api.wunderground.com\r\n" + "Content-Length: 0\r\n" + "\r\n";
+            var request = $"GET /api/d35da3b56e1c814c/conditions/q/{args[1]}/{args[0].Replace(" ", "_")}.xml HTTP/1.1 \r\n" + "Host: api.wunderground.com\r\n" + "Content-Length: 0\r\n" + "\r\n";
             var response = socket.Send(Encoding.UTF8.GetBytes(request));
 
             var headerBytes = socket.Receive(bytesReceived, bytesReceived.Length, 0);
