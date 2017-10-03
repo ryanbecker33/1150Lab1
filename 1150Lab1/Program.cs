@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace _1150Lab1
 {
@@ -9,30 +10,28 @@ namespace _1150Lab1
     {
         static void Main(string[] args)
         {
-            string hostname = "api.wunderground.com";
-            int port = 80;
-            Byte[] bytesReceived = new Byte[512];
+            const string hostname = "api.wunderground.com";
+            const int port = 80;
 
-            Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
-            IPAddress[] adds = Dns.GetHostEntry(hostname).AddressList;
-            IPAddress host = Dns.GetHostEntry(hostname).AddressList[0];
-            IPEndPoint hostep = new IPEndPoint(host, port);
-            sock.Connect(hostep);
+            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+            var host = Dns.GetHostEntry(hostname).AddressList[0];
+            var hostep = new IPEndPoint(host, port);
+            socket.Connect(hostep);
 
-            string request = "GET /api/d35da3b56e1c814c/conditions/q/CA/San_Francisco.xml HTTP/1.1 \r\n" + "Host: api.wunderground.com\r\n" + "Content-Length: 0\r\n" + "\r\n";
-            int response = sock.Send(Encoding.UTF8.GetBytes(request));
+            var bytesReceived = new byte[512];
 
-            int bytes = 0;
-            string data = "";
-            do
-            {
-                bytes = sock.Receive(bytesReceived, bytesReceived.Length, 0);
-                data = data + Encoding.ASCII.GetString(bytesReceived, 0, bytes);
-            }
-            while (bytes > 0);
+            const string request = "GET /api/d35da3b56e1c814c/conditions/q/CA/San_Francisco.xml HTTP/1.1 \r\n" + "Host: api.wunderground.com\r\n" + "Content-Length: 0\r\n" + "\r\n";
+            var response = socket.Send(Encoding.UTF8.GetBytes(request));
 
-            Console.WriteLine(host);
-            Console.WriteLine(data);
+            var headerBytes = socket.Receive(bytesReceived, bytesReceived.Length, 0);
+            var headerData = Encoding.ASCII.GetString(bytesReceived, 0, headerBytes);
+
+            var contentLength = int.Parse(Regex.Match(headerData, @"Content-Length: (\d*)").Groups[1].Value);
+            var initialResponse = Regex.Match(headerData, @"<response>[\s\S]*").Value;
+            var responseBuffer = new byte[contentLength - initialResponse.Length];
+
+            var responseBytes = socket.Receive(responseBuffer, responseBuffer.Length, 0);
+            var responseData = initialResponse + Encoding.ASCII.GetString(responseBuffer, 0, responseBytes);
         }
     }
 }
